@@ -33,7 +33,7 @@ def matrices(shape, operators, combine):
                 # This identity can be derived from the properties of the kronecker product.
                 # This is useful when you need to apply each operator on a different axis,
                 # like in the case of finding the divergence of a velocity field using the gradient.
-                yield reduce(sp.kron, tuple(matrix if k == i else sp.identity(d) for k, d in enumerate(shape)))
+                yield reduce(sp.kron, (matrix if k == i else sp.identity(d) for k, d in enumerate(shape)))
 
     # Credit to Philip Zucker for figuring out that kronsum's argument order is reversed.
     # Without that bit of wisdom I'd have lost it.
