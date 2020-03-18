@@ -3,7 +3,7 @@ from PIL import Image
 
 from fluid import Fluid
 
-FRAME_PATH = 'C:/users/liz/desktop/fluid/'
+FRAME_PATH = 'placeholder'
 
 RESOLUTION = (700, 700)
 VISCOSITY = 10 ** -3
