@@ -31,7 +31,7 @@ def matrices(shape, operators, combine):
             else:
                 # The sum of these kronecker product folds is equivalent to the kronecker sum of all the matrices.
                 # This identity can be derived from the properties of the kronecker product.
-                # This is useful for when you need to apply each operator on a different axis,
+                # This is useful when you need to apply each operator on a different axis,
                 # like in the case of finding the divergence of a velocity field using the gradient.
                 yield reduce(sp.kron, tuple(matrix if k == i else sp.identity(d) for k, d in enumerate(shape)))
 
