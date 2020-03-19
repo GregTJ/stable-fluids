@@ -26,7 +26,7 @@ points = tuple(r * circle(p * np.pi * 2 / 3) + center for p in range(3))
 
 fluid = Fluid(RESOLUTION, VISCOSITY, ('r', 'g', 'b'))
 
-inflow_dye_field = np.zeros((np.product(RESOLUTION), 3))
+inflow_dye_field = np.zeros((fluid.size, 3))
 inflow_velocity_field = np.zeros_like(fluid.velocity_field)
 for i, p in enumerate(points):
     _ = np.dstack(tuple(fluid.indices[..., d] - p[d] for d in range(2)))
