@@ -12,7 +12,7 @@ def differences(accuracy, order):
     def parts(points, o):
         coefficients = np.vander(points)
         coefficients = np.linalg.inv(coefficients)
-        return coefficients[-(o + 1)] * factorial(o)
+        return coefficients[-o - 1] * factorial(o)
 
     return tuple(parts(range(-accuracy, accuracy + 1), o) for o in order)
 
@@ -22,7 +22,7 @@ def matrices(shape, operators, combine):
         for i, o in enumerate(operators):
             diagonals = []
             for j, p in enumerate(o):
-                index = -(len(o) // 2 - j)
+                index = j - len(o) // 2
                 diagonals.append((p * np.ones(shape[i] - abs(index)), index))
 
             matrix = sp.diags(*zip(*diagonals))
