@@ -24,7 +24,8 @@ r = np.min(center) - INFLOW_PADDING
 directions = tuple(-circle(p * np.pi * 2 / 3) for p in range(3))
 points = tuple(r * circle(p * np.pi * 2 / 3) + center for p in range(3))
 
-fluid = Fluid(RESOLUTION, VISCOSITY, ('r', 'g', 'b'))
+channels = ('r', 'g', 'b')
+fluid = Fluid(RESOLUTION, VISCOSITY, channels)
 
 inflow_dye_field = np.zeros((fluid.size, 3))
 inflow_velocity_field = np.zeros_like(fluid.velocity_field)
@@ -45,13 +46,14 @@ for frame in range(DURATION):
     if frame <= INFLOW_DURATION:
         fluid.velocity_field += inflow_velocity_field
 
-        for i, k in enumerate(('r', 'g', 'b')):
+        for i, k in enumerate(channels):
             fluid.quantities[k] += inflow_dye_field[..., i]
 
     fluid.project()
 
-    rgb = np.dstack((fluid.quantities['r'], fluid.quantities['g'], fluid.quantities['b']))
+    rgb = np.dstack(tuple(fluid.quantities[c] for c in channels))
 
     rgb = rgb.reshape((*RESOLUTION, 3))
     rgb = (np.clip(rgb, 0, 1) * 255).astype('uint8')
     Image.fromarray(rgb).save(f'{FRAME_PATH}Frame {frame}.png')
+
