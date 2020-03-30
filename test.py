@@ -30,11 +30,10 @@ fluid = Fluid(RESOLUTION, VISCOSITY, channels)
 inflow_dye_field = np.zeros((fluid.size, len(channels)))
 inflow_velocity_field = np.zeros_like(fluid.velocity_field)
 for i, p in enumerate(points):
-    _ = fluid.indices - p
-    _ = np.linalg.norm(_.squeeze(), axis=1)
+    distance = np.linalg.norm(fluid.indices - p, axis=1)
 
     for d in range(2):
-        inflow_velocity_field[..., d][_ <= INFLOW_RADIUS] = directions[i][d] * INFLOW_VELOCITY
+        inflow_velocity_field[..., d][distance <= INFLOW_RADIUS] = directions[i][d] * INFLOW_VELOCITY
 
     inflow_dye_field[..., i][_ <= INFLOW_RADIUS] = 1
 
