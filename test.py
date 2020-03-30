@@ -5,7 +5,7 @@ from fluid import Fluid
 
 FRAME_PATH = 'placeholder'
 
-RESOLUTION = (700, 700)
+RESOLUTION = 700, 700
 VISCOSITY = 10 ** -3
 DURATION = 200
 
@@ -24,13 +24,13 @@ r = np.min(center) - INFLOW_PADDING
 directions = tuple(-circle(p * np.pi * 2 / 3) for p in range(3))
 points = tuple(r * circle(p * np.pi * 2 / 3) + center for p in range(3))
 
-channels = ('r', 'g', 'b')
+channels = 'r', 'g', 'b'
 fluid = Fluid(RESOLUTION, VISCOSITY, channels)
 
 inflow_dye_field = np.zeros((fluid.size, len(channels)))
 inflow_velocity_field = np.zeros_like(fluid.velocity_field)
 for i, p in enumerate(points):
-    _ = np.dstack(tuple(fluid.indices[..., d] - p[d] for d in range(2)))
+    _ = fluid.indices - p
     _ = np.linalg.norm(_.squeeze(), axis=1)
 
     for d in range(2):
