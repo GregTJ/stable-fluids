@@ -19,7 +19,7 @@ def circle(theta):
     return np.asarray((np.cos(theta), np.sin(theta)))
 
 
-center = np.asarray(RESOLUTION) // 2
+center = np.floor_divide(RESOLUTION, 2)
 r = np.min(center) - INFLOW_PADDING
 directions = tuple(-circle(p * np.pi * 2 / 3) for p in range(3))
 points = tuple(r * circle(p * np.pi * 2 / 3) + center for p in range(3))
@@ -31,11 +31,12 @@ inflow_dye_field = np.zeros((fluid.size, len(channels)))
 inflow_velocity_field = np.zeros_like(fluid.velocity_field)
 for i, p in enumerate(points):
     distance = np.linalg.norm(fluid.indices - p, axis=1)
+    mask = distance <= INFLOW_RADIUS
 
     for d in range(2):
-        inflow_velocity_field[..., d][distance <= INFLOW_RADIUS] = directions[i][d] * INFLOW_VELOCITY
+        inflow_velocity_field[..., d][mask] = directions[i][d] * INFLOW_VELOCITY
 
-    inflow_dye_field[..., i][_ <= INFLOW_RADIUS] = 1
+    inflow_dye_field[..., i][mask] = 1
 
 for frame in range(DURATION):
     print(f'Computing frame {frame}.')
