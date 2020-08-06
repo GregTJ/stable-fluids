@@ -1,5 +1,5 @@
 # n-D stable fluids
-An adaptation of Jos Stam's stable fluids to Python/NumPy.
+An adaptation of Jos Stam's stable fluids to Python/NumPy with a slightly modified routine (no FFT.)
 ![](test.gif)
 
 Citations:\
