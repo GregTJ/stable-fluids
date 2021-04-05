@@ -1,5 +1,5 @@
 # Py Stable Fluids
-An abridged adaptation of Jos Stam's stable fluids to Python with NumPy.
+An abridged and minimal adaptation of Jos Stam's stable fluids to Python with NumPy.
 ![](test.gif)
 
 Citations:\
