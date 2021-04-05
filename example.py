@@ -1,6 +1,6 @@
 import numpy as np
 from PIL import Image
-
+from scipy.special import erf
 from fluid import Fluid
 
 RESOLUTION = 500, 500
@@ -42,11 +42,10 @@ for f in range(DURATION):
         fluid.dye += inflow_dye
 
     curl = fluid.step()[1]
-    curl -= curl.min()
-    curl /= curl.max() * 2
+    curl = (erf(curl * 2) + 1) / 4
 
     color = np.dstack((curl, np.ones(fluid.shape), fluid.dye))
     color = (np.clip(color, 0, 1) * 255).astype('uint8')
     frames.append(Image.fromarray(color, mode='HSV').convert('RGB'))
 
-frames[0].save('test.gif', save_all=True, append_images=frames[1:], duration=20, loop=0)
+frames[0].save('example.gif', save_all=True, append_images=frames[1:], duration=20, loop=0)

@@ -42,8 +42,8 @@ class Fluid:
         for q in self.quantities:
             setattr(self, q, advect(getattr(self, q)))
 
-        # Compute the jacobian at each point of the field
-        # to compute curl and divergence.
+        # Compute the jacobian at each point in the
+        # velocity field to extract curl and divergence.
         jacobian_shape = (self.dimensions,) * 2
         partials = tuple(np.gradient(d) for d in self.velocity)
         jacobian = np.stack(partials).reshape(*jacobian_shape, *self.shape)

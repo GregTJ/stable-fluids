@@ -1,6 +1,6 @@
 # Py Stable Fluids
-An abridged and minimal adaptation of Jos Stam's stable fluids to Python with NumPy.
-![](test.gif)
+An abridged adaptation of Jos Stam's stable fluids to Python with NumPy.
+![](example.gif)
 
 Citations:\
 [Philip Zucker's blog post on fluid simulation](http://www.philipzucker.com/annihilating-my-friend-will-with-a-python-fluid-simulation-like-the-cur-he-is/)\
