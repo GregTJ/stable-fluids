@@ -29,11 +29,10 @@ points = tuple(r * p + center for p in points)
 
 inflow_velocities = np.zeros_like(fluid.velocity)
 inflow_dye = np.zeros(fluid.shape)
-for i, p, n in zip(*zip(*enumerate(points)), normals):
+for p, n in zip(points, normals):
     mask = np.linalg.norm(fluid.indices - p.reshape(2, 1, 1), axis=0) <= INFLOW_RADIUS
     inflow_velocities[:, mask] += n.reshape(2, 1) * INFLOW_VELOCITY
     inflow_dye[mask] = 1
-
 
 frames = []
 for f in range(DURATION):
