@@ -9,7 +9,6 @@ class Fluid:
     def __init__(self, shape, *quantities, pressure_order=1, advect_order=3):
         self.shape = shape
         self.dimensions = len(shape)
-        self.advect_order = advect_order
 
         # By dynamically creating advected-diffused quantities
         # as needed prototyping becomes much easier.
@@ -22,6 +21,8 @@ class Fluid:
 
         laplacian = operator(shape, difference(2, pressure_order))
         self.pressure_solver = factorized(laplacian)
+        
+        self.advect_order = advect_order
 
     def step(self):
         # Advection is computed backwards in time as described in Stable Fluids.
