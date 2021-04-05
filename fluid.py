@@ -1,64 +1,60 @@
 import numpy as np
-import scipy.sparse as sp
-from scipy.ndimage import map_coordinates
+from scipy.ndimage import map_coordinates, spline_filter
 from scipy.sparse.linalg import factorized
 
-import operators as ops
+from numerical import difference, operator
 
 
 class Fluid:
-    def __init__(self, shape, viscosity, quantities):
+    def __init__(self, shape, *quantities):
         self.shape = shape
-        # Defining these here keeps the code somewhat more readable vs. computing them every time they're needed.
-        self.size = np.product(shape)
         self.dimensions = len(shape)
 
-        # Variable viscosity, both in time and in space, is easy to set up; but it conflicts with the use of
-        # SciPy's factorized function because the diffusion matrix must be recalculated every frame.
-        # In order to keep the simulation speedy I use fixed viscosity.
-        self.viscosity = viscosity
-
-        # By dynamically creating advected-diffused quantities as needed prototyping becomes much easier.
-        self.quantities = {}
+        # By dynamically creating advected-diffused quantities
+        # as needed prototyping becomes much easier.
+        self.quantities = quantities
         for q in quantities:
-            self.quantities[q] = np.zeros(self.size)
+            setattr(self, q, np.zeros(shape))
 
-        self.velocity_field = np.zeros((self.size, self.dimensions))
-        # The reshaping here corresponds to a partial flattening so that self.indices
-        # has the same shape as self.velocity_field.
-        # This makes calculating the advection map as simple as a single vectorized subtraction each frame.
-        self.indices = np.dstack(np.indices(self.shape)).reshape(self.size, self.dimensions)
+        self.indices = np.indices(shape)
+        self.velocity = np.zeros((self.dimensions, *shape))
 
-        self.gradient = ops.matrices(shape, ops.differences(1, (1,) * self.dimensions), False)
-
-        # Both viscosity and pressure equations are just Poisson equations similar to the steady state heat equation.
-        laplacian = ops.matrices(shape, ops.differences(1, (2,) * self.dimensions), True)
+        laplacian = operator(shape, difference(2))
         self.pressure_solver = factorized(laplacian)
-        # Making sure I use the sparse version of the identity function here so I don't cast to a dense matrix.
-        self.viscosity_solver = factorized(sp.identity(self.size) - laplacian * viscosity)
 
-    def advect_diffuse(self):
-        # Advection is computed backwards in time as described in Jos Stam's Stable Fluids whitepaper.
-        advection_map = np.moveaxis(self.indices - self.velocity_field, -1, 0)
+    def step(self):
+        # Advection is computed backwards in time as described in Stable Fluids.
+        advection_map = self.indices - self.velocity
 
-        def kernel(field):
-            # Credit to Philip Zucker for pointing out the aptness of map_coordinates here.
-            # Initially I was using SciPy's griddata function.
-            # While both of these functions do essentially the same thing, griddata is much slower.
-            advected = map_coordinates(field.reshape(self.shape), advection_map, order=2).flatten()
-            return self.viscosity_solver(advected) if self.viscosity > 0 else advected
+        # SciPy's spline filter introduces checkerboard divergence.
+        # A linear blend of the filtered and unfiltered fields based
+        # on some value epsilon eliminates this error.
+        def advect(field, order=3, filter_epsilon=10e-2, mode='constant'):
+            filtered = spline_filter(field, order=order, mode=mode)
+            field = filtered * (1 - filter_epsilon) + field * filter_epsilon
+            return map_coordinates(field, advection_map, prefilter=False, order=order, mode=mode)
 
-        # Apply viscosity and advection to each axis of the velocity field and each user-defined quantity.
+        # Apply viscosity and advection to each axis of the
+        # velocity field and each user-defined quantity.
         for d in range(self.dimensions):
-            self.velocity_field[..., d] = kernel(self.velocity_field[..., d])
+            self.velocity[d] = advect(self.velocity[d])
 
-        for k, q in self.quantities.items():
-            self.quantities[k] = kernel(q)
+        for q in self.quantities:
+            setattr(self, q, advect(getattr(self, q)))
 
-    def project(self):
-        # Pressure is calculated from divergence which is in turn calculated from the gradient of the velocity field.
-        divergence = sum(self.gradient[d].dot(self.velocity_field[..., d]) for d in range(self.dimensions))
-        pressure = self.pressure_solver(divergence)
+        # Compute the jacobian at each point of the field
+        # to compute curl and divergence.
+        jacobian_shape = (self.dimensions,) * 2
+        partials = tuple(np.gradient(d) for d in self.velocity)
+        jacobian = np.stack(partials).reshape(*jacobian_shape, *self.shape)
 
-        for d in range(self.dimensions):
-            self.velocity_field[..., d] -= self.gradient[d].dot(pressure)
+        divergence = jacobian.trace()
+
+        curl_mask = np.triu(np.ones(jacobian_shape, dtype=bool), k=1)
+        curl = (jacobian[curl_mask] - jacobian[curl_mask.T]).squeeze()
+
+        # Apply the pressure correction to the fluid's velocity field.
+        pressure = self.pressure_solver(divergence.flatten()).reshape(self.shape)
+        self.velocity -= np.gradient(pressure)
+
+        return divergence, curl, pressure
