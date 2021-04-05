@@ -10,8 +10,8 @@ class Fluid:
         self.shape = shape
         self.dimensions = len(shape)
 
-        # By dynamically creating advected-diffused quantities
-        # as needed prototyping becomes much easier.
+        # Prototyping is simplified by dynamically 
+        # creating advected quantities as needed.
         self.quantities = quantities
         for q in quantities:
             setattr(self, q, np.zeros(shape))
