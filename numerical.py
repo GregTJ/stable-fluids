@@ -36,6 +36,7 @@ def operator(shape, *differences, separate=False):
         # This identity can be derived from the
         # properties of the kronecker product and
         # is analogous to separation of variables.
+        # See: https://en.wikipedia.org/wiki/Kronecker_sum_of_discrete_Laplacians
         return tuple(reduce(_, f) for f in factors)
 
     else:
