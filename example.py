@@ -23,7 +23,7 @@ def circle(theta):
 
 center = np.floor_divide(RESOLUTION, 2)
 r = np.min(center) - INFLOW_PADDING
-points = tuple(circle(p * np.pi * (1 - (1 / INFLOW_COUNT))) for p in range(INFLOW_COUNT))
+points = tuple(circle(2 * np.pi * p / INFLOW_COUNT) for p in range(INFLOW_COUNT))
 normals = tuple(-p for p in points)
 points = tuple(r * p + center for p in points)
 
