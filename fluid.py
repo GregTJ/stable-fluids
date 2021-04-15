@@ -52,6 +52,11 @@ class Fluid:
 
         divergence = jacobian.trace()
 
+        # If this curl calculation is extended to 3D, the y-axis value must be negated.
+        # This corresponds to the coefficients of the levi-civita symbol in that dimension.
+        # Higher dimensions do not have a vector -> scalar, or vector -> vector,
+        # correspondence between velocity and curl due to differing isomorphisms
+        # between exterior powers in dimensions != 2 or 3 respectively.
         curl_mask = np.triu(np.ones(jacobian_shape, dtype=bool), k=1)
         curl = (jacobian[curl_mask] - jacobian[curl_mask.T]).squeeze()
 
