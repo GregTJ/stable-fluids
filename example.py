@@ -16,29 +16,26 @@ INFLOW_COUNT = 5
 print('Generating fluid solver, this may take some time.')
 fluid = Fluid(RESOLUTION, 'dye')
 
-
-def circle(theta):
-    return np.asarray((np.cos(theta), np.sin(theta)))
-
-
 center = np.floor_divide(RESOLUTION, 2)
 r = np.min(center) - INFLOW_PADDING
-points = tuple(circle(2 * np.pi * p / INFLOW_COUNT) for p in range(INFLOW_COUNT))
+
+points = np.linspace(-np.pi, np.pi, INFLOW_COUNT, endpoint=False)
+points = tuple(np.array((np.cos(p), np.sin(p))) for p in points)
 normals = tuple(-p for p in points)
 points = tuple(r * p + center for p in points)
 
-inflow_velocities = np.zeros_like(fluid.velocity)
+inflow_velocity = np.zeros_like(fluid.velocity)
 inflow_dye = np.zeros(fluid.shape)
 for p, n in zip(points, normals):
-    mask = np.linalg.norm(fluid.indices - p.reshape(2, 1, 1), axis=0) <= INFLOW_RADIUS
-    inflow_velocities[:, mask] += n.reshape(2, 1) * INFLOW_VELOCITY
+    mask = np.linalg.norm(fluid.indices - p[:, None, None], axis=0) <= INFLOW_RADIUS
+    inflow_velocity[:, mask] += n[:, None] * INFLOW_VELOCITY
     inflow_dye[mask] = 1
 
 frames = []
 for f in range(DURATION):
     print(f'Computing frame {f + 1} of {DURATION}.')
     if f <= INFLOW_DURATION:
-        fluid.velocity += inflow_velocities
+        fluid.velocity += inflow_velocity
         fluid.dye += inflow_dye
 
     curl = fluid.step()[1]
