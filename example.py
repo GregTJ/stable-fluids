@@ -39,6 +39,8 @@ for f in range(DURATION):
         fluid.dye += inflow_dye
 
     curl = fluid.step()[1]
+    # Using the error function to make the contrast a bit higher. 
+    # Any other sigmoid function e.g. smoothstep would work.
     curl = (erf(curl * 2) + 1) / 4
 
     color = np.dstack((curl, np.ones(fluid.shape), fluid.dye))
