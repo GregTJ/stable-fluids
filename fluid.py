@@ -36,7 +36,7 @@ class Fluid:
             field = filtered * (1 - filter_epsilon) + field * filter_epsilon
             return map_coordinates(field, advection_map, prefilter=False, order=self.advect_order, mode=mode)
 
-        # Apply viscosity and advection to each axis of the
+        # Apply advection to each axis of the
         # velocity field and each user-defined quantity.
         for d in range(self.dimensions):
             self.velocity[d] = advect(self.velocity[d])
